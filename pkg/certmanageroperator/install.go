@@ -2,15 +2,12 @@ package certmanageroperator
 
 import (
 	_ "embed"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/maistra/maistra-test-tool/pkg/util/oc"
 	"github.com/maistra/maistra-test-tool/pkg/util/operator"
 	"github.com/maistra/maistra-test-tool/pkg/util/pod"
 	"github.com/maistra/maistra-test-tool/pkg/util/retry"
-	"github.com/maistra/maistra-test-tool/pkg/util/shell"
 	"github.com/maistra/maistra-test-tool/pkg/util/test"
 )
 
@@ -27,7 +24,7 @@ var (
 )
 
 func InstallIfNotExist(t test.TestHelper) {
-	if certManagerOperatorExists(t) {
+	if operator.OperatorExists(t, certmanagerVersion) {
 		t.Log("cert-manager-operator is already installed")
 	} else {
 		t.Log("cert-manager-operator is not installed, starting installation")
@@ -49,11 +46,6 @@ func Uninstall(t test.TestHelper) {
 	oc.DeleteFromTemplate(t, certManagerOperatorNs, certManagerOperator, map[string]string{"Version": certmanagerVersion})
 	oc.DeleteNamespace(t, certManagerOperatorNs)
 	oc.DeleteNamespace(t, certManagerNs)
-}
-
-func certManagerOperatorExists(t test.TestHelper) bool {
-	output := shell.Execute(t, fmt.Sprintf(`oc get csv -A -o custom-columns="NAME:.metadata.name,REPLACES:.spec.replaces" |grep %s ||true`, certmanagerVersion))
-	return strings.Contains(output, certmanagerVersion)
 }
 
 func installOperator(t test.TestHelper) {
