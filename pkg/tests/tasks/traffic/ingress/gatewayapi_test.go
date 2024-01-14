@@ -28,7 +28,11 @@ func TestGatewayApi(t *testing.T) {
 		ossm.DeployControlPlane(t)
 
 		t.LogStep("Install Gateway API CRD's")
-		shell.Executef(t, "kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null && echo 'Gateway API CRDs already installed' || kubectl apply -k github.com/kubernetes-sigs/gateway-api/config/crd/experimental?ref=v0.5.1")
+		if env.GetSMCPVersion().LessThanOrEqual(version.SMCP_2_4) {
+			shell.Executef(t, "kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null && echo 'Gateway API CRDs already installed' || kubectl apply -k github.com/kubernetes-sigs/gateway-api/config/crd/experimental?ref=v0.5.1")
+		} else {
+			shell.Executef(t, "kubectl get crd gateways.gateway.networking.k8s.io &> /dev/null && echo 'Gateway API CRDs already installed' || kubectl apply -k github.com/kubernetes-sigs/gateway-api/config/crd/experimental?ref=v0.6.2")
+		}
 
 		oc.CreateNamespace(t, ns)
 
