@@ -16,6 +16,7 @@ package ossm
 
 import (
 	"fmt"
+	"math/rand"
 	"strings"
 	"testing"
 	"time"
@@ -32,6 +33,16 @@ import (
 )
 
 var workername string
+
+func TestInstability(t *testing.T) {
+	test.NewTest(t).Groups(test.Full, test.Disconnected).Run(func(t test.TestHelper) {
+		if rand.Intn(2)==1 {
+			t.LogSuccess("passed")
+		} else {
+			t.Error("failed")
+		}
+	})
+}
 
 func TestDeployOnInfraNodes(t *testing.T) {
 	test.NewTest(t).Id("T40").Groups(test.Full, test.Disconnected).Run(func(t test.TestHelper) {
