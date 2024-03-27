@@ -276,6 +276,15 @@ func (o OC) WaitSMCPReady(t test.TestHelper, ns string, name string) {
 		t.T().Helper()
 		o.WaitFor(t, ns, "smcp", name, "condition=Ready")
 	})
+
+	isGwExist := shell.Executef(t, "oc get route -n %s -l app=istio-ingressgateway", ns)
+	if strings.Contains(isGwExist, "No resources found") {
+		t.Logf("No ingress gateway route found, skip workaround for OSSM-6139")
+	} else {
+		t.Logf("Apply workaround for OSSM-6139")
+		gatewayRouteName := shell.Executef(t, "oc get route -n %s -l app=istio-ingressgateway -o jsonpath='{.items[0].metadata.name}'", ns)
+		shell.Executef(t, "oc -n %s patch route %s -p '{\"spec\": {\"port\": {\"targetPort\": \"http2\"}}}'", ns, gatewayRouteName)
+	}
 }
 
 func (o OC) Patch(t test.TestHelper, ns, kind, name string, mergeType string, patch string) {
